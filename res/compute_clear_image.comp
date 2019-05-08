@@ -1,0 +1,8 @@
+#version 430
+layout(local_size_x = 1) in;
+layout(rgba32f, binding = 0) uniform image2D image_output;
+
+void main(){
+	ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.xy);
+	imageStore(image_output, pixel_coords, vec4(0,0,0,0));
+}

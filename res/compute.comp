@@ -1,0 +1,109 @@
+#version 430
+layout(local_size_x = 1) in;
+layout(rgba32f, binding = 0) uniform image2D image_output;
+layout(location = 0) uniform vec2 position;
+
+#define PI 3.14159265359
+#define WIDTH 512
+#define HEIGHT 512
+
+float sdf_circle(vec2 p, vec2 c, float radius){
+	return length(c - p) - radius;
+}
+
+float sdf_box(vec2 p, vec2 c, vec2 size){
+	vec2 offset = abs(p - c) - size;
+	float unsigned_dst = length(max(offset,0));
+	vec2 minv = min(offset, 0);
+	float dst_inside_box = max(minv.x, minv.y);
+	return unsigned_dst + dst_inside_box;
+}
+
+void draw_line(vec2 p0, vec2 p1){
+	vec2 dp = p1-p0;
+	for(float f = 0.0; f < 1.0; f += 0.001){
+		ivec2 coords = ivec2(round(p0.x + f*dp.x), round(p0.y + f*dp.y));
+		imageStore(image_output, coords, vec4(1,0,0,1));
+	}
+}
+
+void draw_circle(vec2 p, float radius){
+	float angle = 2*PI/100;
+	for(int i = 0; i < 100; i++){
+		vec2 p0 = p + radius*vec2(cos(i*angle), sin(i*angle));
+		vec2 p1 = p + radius*vec2(cos((i+1)*angle), sin((i+1)*angle));
+		draw_line(p0, p1);
+	}
+}
+
+float smooth_min(float a, float b, float k){
+	float h = max(k - abs(a - b), 0)/k;
+	return min(a,b) - h*h*h*k*1.0/6.0;
+}
+
+void main(){
+	vec2 objects[4] = {
+		WIDTH*(vec2(0.5,0.5) + vec2( 0.25, 0.25)),
+		WIDTH*(vec2(0.5,0.5) + vec2(-0.25, 0.25)),
+		WIDTH*(vec2(0.5,0.5) + vec2(-0.25,-0.25)),
+		WIDTH*(vec2(0.5,0.5) + vec2( 0.25,-0.25))
+	};
+
+	int raycount = int(gl_NumWorkGroups.x);
+	int i = int(gl_WorkGroupID.x);
+	float angle = i*2*PI/raycount;
+
+	vec2 dir = {cos(angle), sin(angle)};
+
+	vec2 p = position;
+	//for(int i = 0; i < 4; i++){
+	//	draw_circle(objects[i], 10.0);
+	//}
+	float min_sdf = WIDTH;
+	//for(int i = 0; i < 100; i++){
+	while(abs(min_sdf) > 1.0){
+		min_sdf = WIDTH;
+		for(int j = 0; j < 4; j++){
+			vec2 c = objects[j];
+			float d = sdf_box(p, c, vec2(10,10));
+			min_sdf = smooth_min(min_sdf, d, 1.0);
+		}
+
+		//draw_circle(p, min_sdf);
+		p += min_sdf*dir;
+
+		if((p.x > WIDTH || p.x < 0 || p.y > HEIGHT || p.y < 0))
+			break;
+	}
+
+	imageStore(image_output, ivec2(round(p)), vec4(1,0,0,1));
+	draw_line(position, p);
+	//
+	//ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.xy);
+	//imageStore(image_output, pixel_coords, vec4(1,0,0,1));
+
+	//vec4 pixel = vec4(0,0,0,1);
+	//ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.xy);
+
+	//float max_x = 5.0;
+	//float max_y = 5.0;
+	//ivec2 dims = imageSize(image_output); // fetch image dimensions
+	//float x = (float(pixel_coords.x * 2 - dims.x) / dims.x);
+	//float y = (float(pixel_coords.y * 2 - dims.y) / dims.y);
+	//vec3 ray_o = vec3(x * max_x, y * max_y, 0.0);
+	//vec3 ray_d = vec3(0.0, 0.0, -1.0); // ortho
+
+	//vec3 sphere_c = vec3(0.0, 0.0, -10.0);
+	//float sphere_r = 1.0;
+
+	//vec3 omc = ray_o - sphere_c;
+	//float b = dot(ray_d, omc);
+	//float c = dot(omc, omc) - sphere_r * sphere_r;
+	//float bsqmc = b * b - c;
+	//// hit one or both sides
+	//if (bsqmc >= 0.0) {
+	//	pixel = vec4(0.4, 0.4, 1.0, 1.0);
+	//}
+
+	//imageStore(image_output, pixel_coords, pixel);
+}
