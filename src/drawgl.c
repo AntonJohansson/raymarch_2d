@@ -10,6 +10,7 @@
 #include "log.h"
 
 #include <SDL.h>
+#include <SDL_opengl.h>
 
 #define SCREEN_WIDTH 512
 #define SCREEN_HEIGHT 512
@@ -32,7 +33,8 @@ void setupwindow(SDL_Window **window, SDL_GLContext *context){
         sdldie("Unable to initialize SDL");
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
@@ -43,11 +45,14 @@ void setupwindow(SDL_Window **window, SDL_GLContext *context){
         sdldie("Unable to create window");
 
     *context = SDL_GL_CreateContext(*window);
+		if(!*context)
+			sdldie("Unable to create gl context");
 
     // This makes our buffer swap syncronized with the monitor's vertical refresh */
     SDL_GL_SetSwapInterval(1);
 
 		// Initialize GLAD after the window context has been created.
+		//printf("%p\n",(void*)SDL_GL_GetProcAddress);
 		if (!gladLoadGLLoader((GLADloadproc) SDL_GL_GetProcAddress)){
 			sdldie("glad fucked up");
 		}

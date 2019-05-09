@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.8)
 
 add_subdirectory(tests)
 
@@ -8,7 +8,7 @@ set(SOURCES
 	src/shader.c
 	src/gl_error_checking.c
 	src/log.c
-	third_party/glad/glad.c
+	third_party/glad/src/glad.c
 	#src/main.c
 	#src/perlin.c
 	#third_party/cimgui/cimgui.cpp
@@ -28,7 +28,7 @@ target_compile_options(${PROJECT} PRIVATE
 	-g
 	)
 
-include_directories(${SDL2_INCLUDE_DIR} ${SDL2_GFX_INCLUDE_DIRS} third_party)
+include_directories(${SDL2_INCLUDE_DIR} ${SDL2_GFX_INCLUDE_DIRS} third_party/glad/include)
 
 if(UNIX AND NOT APPLE)
 	# unix

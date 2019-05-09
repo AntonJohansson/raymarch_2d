@@ -1,9 +1,7 @@
 set(PROJECT tests)
 set(SOURCES
-	testing.c
-	mat_test.c
-
 	../src/mat.c
+	mat_test.c
 	)
 
 project(${PROJECT})
