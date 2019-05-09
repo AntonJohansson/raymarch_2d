@@ -7,6 +7,7 @@
 #include "shader.h"
 #include "gl_error_checking.h"
 #include "vec2.h"
+#include "log.h"
 
 #include <SDL.h>
 
@@ -237,20 +238,22 @@ void destroywindow(SDL_Window* window, SDL_GLContext* context){
 }
 
 /* Our program's entry point */
-int main(int argc, char *argv[])
-{
-    SDL_Window* mainwindow; /* Our window handle */
-    SDL_GLContext maincontext; /* Our opengl context handle */
+int main(){
+	log_info("hej this is a %s %i %f\n", "test", 5, 2.3f);
+	log_warning("hej this is a %s %i %f\n", "test", 5, 2.3f);
+	log_error("hej this is a %s %i %f\n", "test", 5, 2.3f);
+	SDL_Window* mainwindow; /* Our window handle */
+	SDL_GLContext maincontext; /* Our opengl context handle */
 
-    /* Create our window, opengl context, etc... */
-    setupwindow(&mainwindow, &maincontext);
+	/* Create our window, opengl context, etc... */
+	setupwindow(&mainwindow, &maincontext);
 
-		setup_gl_error_callback();
-    /* Call our function that performs opengl operations */
-    drawscene(mainwindow);
+	setup_gl_error_callback();
+	/* Call our function that performs opengl operations */
+	drawscene(mainwindow);
 
-    /* Delete our opengl context, destroy our window, and shutdown SDL */
-    destroywindow(mainwindow, &maincontext);
+	/* Delete our opengl context, destroy our window, and shutdown SDL */
+	destroywindow(mainwindow, &maincontext);
 
-    return 0;
+	return 0;
 }

@@ -1,10 +1,13 @@
 cmake_minimum_required(VERSION 3.14)
 
+add_subdirectory(tests)
+
 set(PROJECT raymarch_2d)
 set(SOURCES
 	src/drawgl.c
 	src/shader.c
 	src/gl_error_checking.c
+	src/log.c
 	third_party/glad/glad.c
 	#src/main.c
 	#src/perlin.c
